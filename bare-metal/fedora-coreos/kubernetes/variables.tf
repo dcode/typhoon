@@ -149,3 +149,39 @@ variable "service_account_issuer" {
   description = "kube-apiserver service account token issuer (used as an identifier in 'iss' claims)"
   default     = "https://kubernetes.default.svc.cluster.local"
 }
+
+variable "k8s_ca_cert" {
+  type      = string
+  default   = null
+  sensitive = true
+}
+
+variable "k8s_ca_key" {
+  type      = string
+  default   = null
+  sensitive = true
+}
+
+variable "etcd_ca_cert" {
+  type      = string
+  default   = null
+  sensitive = true
+}
+
+variable "etcd_ca_key" {
+  type      = string
+  default   = null
+  sensitive = true
+}
+
+variable "aggregation_ca_cert" {
+  type      = string
+  default   = null
+  sensitive = true
+}
+
+variable "aggregation_ca_key" {
+  type      = string
+  default   = null
+  sensitive = true
+}
