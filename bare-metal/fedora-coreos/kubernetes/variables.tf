@@ -30,12 +30,15 @@ variable "os_version" {
 
 variable "controllers" {
   type = list(object({
-    name   = string
-    mac    = string
-    domain = string
+    name         = string
+    mac          = string
+    domain       = string
+    install_disk = optional(string)
   }))
   description = <<EOD
-List of controller machine details (unique name, identifying MAC address, FQDN)
+List of controller machine details (unique name, identifying MAC address, FQDN, optional
+per-controller install_disk override for a node whose disk layout doesn't match
+var.install_disk)
 [{ name = "node1", mac = "52:54:00:a1:9c:ae", domain = "node1.example.com"}]
 EOD
 }

@@ -4,10 +4,16 @@ locals {
     "--name main https://builds.coreos.fedoraproject.org/prod/streams/${var.os_stream}/builds/${var.os_version}/x86_64/fedora-coreos-${var.os_version}-live-initramfs.x86_64.img",
   ]
 
-  remote_args = [
+  # Split around coreos.inst.install_dev (added back per-controller below,
+  # in this same position) so a controller using the module-wide default
+  # renders byte-for-byte identical args to before this was made
+  # per-controller - no spurious replacement of an unrelated controller's
+  # already-served Matchbox profile.
+  remote_args_pre = [
     "initrd=main",
     "coreos.live.rootfs_url=https://builds.coreos.fedoraproject.org/prod/streams/${var.os_stream}/builds/${var.os_version}/x86_64/fedora-coreos-${var.os_version}-live-rootfs.x86_64.img",
-    "coreos.inst.install_dev=${var.install_disk}",
+  ]
+  remote_args_post = [
     "coreos.inst.ignition_url=${var.matchbox_http_endpoint}/ignition?uuid=$${uuid}&mac=$${mac:hexhyp}",
   ]
 
@@ -16,16 +22,26 @@ locals {
     "/assets/fedora-coreos/fedora-coreos-${var.os_version}-live-initramfs.x86_64.img",
   ]
 
-  cached_args = [
+  cached_args_pre = [
     "initrd=main",
     "coreos.live.rootfs_url=${var.matchbox_http_endpoint}/assets/fedora-coreos/fedora-coreos-${var.os_version}-live-rootfs.x86_64.img",
-    "coreos.inst.install_dev=${var.install_disk}",
+  ]
+  cached_args_post = [
     "coreos.inst.ignition_url=${var.matchbox_http_endpoint}/ignition?uuid=$${uuid}&mac=$${mac:hexhyp}",
   ]
 
-  kernel = var.cached_install ? local.cached_kernel : local.remote_kernel
-  initrd = var.cached_install ? local.cached_initrd : local.remote_initrd
-  args   = var.cached_install ? local.cached_args : local.remote_args
+  kernel    = var.cached_install ? local.cached_kernel : local.remote_kernel
+  initrd    = var.cached_install ? local.cached_initrd : local.remote_initrd
+  args_pre  = var.cached_install ? local.cached_args_pre : local.remote_args_pre
+  args_post = var.cached_install ? local.cached_args_post : local.remote_args_post
+
+  # Most controllers share var.install_disk, but heterogeneous hardware (a
+  # controller whose disk layout doesn't match the others - see
+  # dcode/infra#16) may need a different install target per node, so an
+  # optional per-controller override takes precedence when set.
+  controller_install_disks = [
+    for c in var.controllers : coalesce(c.install_disk, var.install_disk)
+  ]
 }
 
 # Match a controller to a profile by MAC
@@ -46,7 +62,12 @@ resource "matchbox_profile" "controllers" {
 
   kernel = local.kernel
   initrd = local.initrd
-  args   = concat(local.args, var.kernel_args)
+  args = concat(
+    local.args_pre,
+    ["coreos.inst.install_dev=${local.controller_install_disks[count.index]}"],
+    local.args_post,
+    var.kernel_args,
+  )
 
   raw_ignition = data.ct_config.controllers.*.rendered[count.index]
 }
