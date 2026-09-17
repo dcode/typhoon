@@ -30,12 +30,23 @@ variable "os_version" {
 
 variable "controllers" {
   type = list(object({
-    name   = string
-    mac    = string
-    domain = string
+    name                       = string
+    mac                        = string
+    domain                     = string
+    install_disk               = optional(string)
+    etcd_initial_cluster_state = optional(string)
   }))
   description = <<EOD
-List of controller machine details (unique name, identifying MAC address, FQDN)
+List of controller machine details (unique name, identifying MAC address, FQDN, optional
+per-controller install_disk override for a node whose disk layout doesn't match
+var.install_disk, optional etcd_initial_cluster_state override).
+
+etcd_initial_cluster_state defaults to "new" - correct for bootstrapping every controller
+in this list together from scratch. A controller being added later to a cluster whose
+other members are already running must use "existing", AND must first be registered via
+`etcdctl member add` against the live cluster before it boots - etcd does not add members
+by having a new node simply show up with a wider ETCD_INITIAL_CLUSTER list.
+
 [{ name = "node1", mac = "52:54:00:a1:9c:ae", domain = "node1.example.com"}]
 EOD
 }
