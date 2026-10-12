@@ -166,6 +166,11 @@ storage:
           gid = 0
           [plugins."io.containerd.grpc.v1.cri"]
           enable_selinux = true
+          # Block-mode PVCs reach a container as a root:disk 0660 device node. Without this,
+          # a pod running as non-root (CDI's importer, KubeVirt's virt-launcher) gets
+          # "Permission denied" opening its own volume; with it, containerd chowns the node
+          # to the pod's runAsUser/runAsGroup, as KubeVirt and CDI document.
+          device_ownership_from_security_context = true
           [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc]
           runtime_type = "io.containerd.runc.v2"
           [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
