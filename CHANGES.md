@@ -4,9 +4,24 @@ Notable changes between versions.
 
 ## Latest
 
+* Kubernetes [v1.37.2](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.37.md#v1372)
+
+## v1.36.2
+
+* Kubernetes [v1.36.2](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.36.md#v1362)
+
+### Azure
+
+* Add Azure Virtual Network outputs `network_name`, `network_id` and `subnet_ids`
+* Disable VMSS rolling upgrades and instance repair for Fedora CoreOS ([#1669](https://github.com/poseidon/typhoon/pull/1669))
+  * Fedora CoreOS does not ship Azure Linux Agent, so instance repair would constantly replace instances
+  * Updating Fedora CoreOS VMSS instances has to be triggered manually
+
 ## v1.36.1
 
 * Kubernetes [v1.36.1](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.36.md#v1361)
+* Add `cloud_provider` variable so "external" cloud controller managers may be used (default null) ([#1663](https://github.com/poseidon/typhoon/pull/1663))
+* Update flannel from v0.28.4 to [v0.28.5](https://github.com/flannel-io/flannel/releases/tag/v0.28.5)
 
 ## v1.35.4
 
