@@ -36,7 +36,7 @@ systemd:
         After=docker.service
         Wants=rpc-statd.service
         [Service]
-        Environment=KUBELET_IMAGE=quay.io/poseidon/kubelet:v1.36.1
+        Environment=KUBELET_IMAGE=quay.io/poseidon/kubelet:v1.37.2
         ExecStartPre=/bin/mkdir -p /etc/cni/net.d
         ExecStartPre=/bin/mkdir -p /etc/kubernetes/manifests
         ExecStartPre=/bin/mkdir -p /opt/cni/bin
@@ -67,7 +67,6 @@ systemd:
           --container-runtime-endpoint=unix:///run/containerd/containerd.sock \
           --hostname-override=${domain_name} \
           --kubeconfig=/var/lib/kubelet/kubeconfig \
-          --node-labels=node.kubernetes.io/node \
           %{~ for label in compact(split(",", node_labels)) ~}
           --node-labels=${label} \
           %{~ endfor ~}
