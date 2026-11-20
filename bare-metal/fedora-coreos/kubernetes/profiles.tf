@@ -76,9 +76,12 @@ resource "matchbox_profile" "controllers" {
 data "ct_config" "controllers" {
   count = length(var.controllers)
   content = templatefile("${path.module}/butane/controller.yaml", {
-    domain_name                = var.controllers.*.domain[count.index]
-    etcd_name                  = var.controllers.*.name[count.index]
-    etcd_initial_cluster       = join(",", formatlist("%s=https://%s:2380", var.controllers.*.name, var.controllers.*.domain))
+    domain_name = var.controllers.*.domain[count.index]
+    etcd_name   = var.controllers.*.name[count.index]
+    etcd_initial_cluster = join(",", concat(
+      formatlist("%s=https://%s:2380", var.controllers.*.name, var.controllers.*.domain),
+      [for name, peer_url in var.etcd_extra_initial_cluster_members : "${name}=${peer_url}"],
+    ))
     etcd_initial_cluster_state = coalesce(var.controllers[count.index].etcd_initial_cluster_state, "new")
     cluster_dns_service_ip     = module.bootstrap.cluster_dns_service_ip
     ssh_authorized_key         = var.ssh_authorized_key
