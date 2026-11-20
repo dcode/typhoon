@@ -51,6 +51,19 @@ by having a new node simply show up with a wider ETCD_INITIAL_CLUSTER list.
 EOD
 }
 
+variable "etcd_extra_initial_cluster_members" {
+  type        = map(string)
+  default     = {}
+  description = <<EOD
+Extra etcd members that aren't Typhoon controllers (e.g. an external etcd voter run elsewhere
+for quorum), as a map of etcd member name to peer URL. Appended to every controller's
+ETCD_INITIAL_CLUSTER so a controller rejoining with etcd_initial_cluster_state = "existing"
+lists the cluster's full membership; etcd refuses to start if a member is missing from it.
+
+{ nas = "https://nas.example.com:2380" }
+EOD
+}
+
 variable "workers" {
   type = list(object({
     name   = string
